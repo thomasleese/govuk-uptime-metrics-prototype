@@ -52,8 +52,10 @@ def main
 
   Dir.glob("#{path}/tmp/*.csv") do |filename|
     date = File.basename(filename, ".csv")
+
     if date == current_date
-      #next  # data still being added
+      puts "Skipping #{date} as that's today!"
+      next  # data still being added
     end
 
     data = CSV.read(filename)
@@ -61,8 +63,10 @@ def main
       seconds_up = aggregate_data(current_date, rows)
       proportion_up = seconds_up / seconds_in_day
       minutes_down = (seconds_in_day - seconds_up) / 60
-      append_to_csv(csv_filename, service, current_date, proportion_up, minutes_down)
+      append_to_csv(csv_filename, service, date, proportion_up, minutes_down)
     end
+
+    # FileUtils.rm(filename)
   end
 end
 
