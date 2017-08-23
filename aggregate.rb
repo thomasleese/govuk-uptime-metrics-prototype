@@ -25,10 +25,8 @@ def aggregate_data(current_date, rows)
   sorted_rows = rows.sort_by { |(date, up)| date }
 
   sorted_rows.each do |(date, up)|
-    seconds_diff = date - last_date
-    seconds_up += seconds_diff if up
-    last_date = date
-    last_up = up
+    seconds_up += (date - last_date) if up
+    last_date, last_up = date, up
   end
 
   seconds_up += (end_date - last_date) if last_up
