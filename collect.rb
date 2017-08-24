@@ -6,6 +6,7 @@ require "csv"
 require "fileutils"
 require "net/http"
 require "time"
+require "statsd"
 
 def check_status(service)
   uri = URI("https://#{service}.publishing.service.gov.uk/healthcheck")
@@ -19,6 +20,10 @@ def append_to_csv(filename, service, status)
   end
 end
 
+def send_to_statsd(service, status)
+  Statsd.new("localhost", 9125).gauge(service, status ? 1 : 0)
+end
+
 def main
   path = ARGV[0]
   service = ARGV[1]
@@ -28,6 +33,10 @@ def main
 
   status = check_status(service)
   append_to_csv(csv_filename, service, status)
+  send_to_statsd(service, status)
 end
 
-main
+while true
+  main
+  sleep 1
+end

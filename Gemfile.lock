@@ -1,0 +1,12 @@
+GEM
+  specs:
+    statsd-ruby (1.4.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  statsd-ruby
+
+BUNDLED WITH
+   1.13.7
