@@ -6,6 +6,7 @@ require "csv"
 require "fileutils"
 require "net/http"
 require "time"
+require "statsd"
 
 statsd = Statsd.new("127.0.0.1", 8125)
 
