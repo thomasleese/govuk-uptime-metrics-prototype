@@ -8,7 +8,7 @@ require "net/http"
 require "time"
 require "statsd"
 
-statsd = Statsd.new("127.0.0.1", 8125)
+$statsd = Statsd.new("127.0.0.1", 8125)
 
 def check_status(service)
   uri = URI("https://#{service}.publishing.service.gov.uk/healthcheck")
@@ -23,7 +23,7 @@ def append_to_csv(filename, service, status)
 end
 
 def send_to_statsd(service, status)
-  statsd.gauge("uptime.#{service}", status ? 1 : 0)
+  $statsd.gauge("uptime.#{service}", status ? 1 : 0)
 end
 
 def main
