@@ -1,11 +1,16 @@
 GEM
+  remote: https://rubygems.org/
   specs:
+    foreman (0.84.0)
+      thor (~> 0.19.1)
     statsd-ruby (1.4.0)
+    thor (0.19.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  foreman
   statsd-ruby
 
 BUNDLED WITH
