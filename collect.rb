@@ -21,7 +21,7 @@ def append_to_csv(filename, service, status)
 end
 
 def send_to_statsd(service, status)
-  Statsd.new("localhost", 8125).gauge("#{service}.uptime", status ? 1 : 0)
+  Statsd.new("127.0.0.1", 8125).gauge("uptime.#{service}", status ? 1 : 0)
 end
 
 def main
