@@ -43,7 +43,14 @@ private
   end
 
   def check_status
-    Net::HTTP.get(healthcheck_uri) == "OK"
+    http = Net::HTTP.new(healthcheck_uri.host, healthcheck_uri.port)
+    http.use_ssl = true
+
+    request = Net::HTTP::Head.new(healthcheck_uri.request_uri)
+    res = http.request(request)
+
+    status_code = res.code.to_i
+    status_code >= 200 && status_code <= 299
   end
 
   def send_to_statsd(status)
