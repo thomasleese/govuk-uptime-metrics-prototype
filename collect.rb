@@ -30,12 +30,10 @@ private
   end
 
   def check_status
-    puts healthcheck_uri
     Net::HTTP.get(healthcheck_uri) == "OK"
   end
 
   def send_to_statsd(status)
-    puts "#{service}: #{status}"
     statsd.gauge("uptime.#{service}", status ? 1 : 0)
   end
 end
