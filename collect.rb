@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Usage: ./collect.rb <path> <service>
+# Usage: ./collect.rb <environment> <service ...>
 
 require "csv"
 require "fileutils"
@@ -43,7 +43,6 @@ private
   end
 
   def check_status
-    puts healthcheck_uri
     Net::HTTP.get(healthcheck_uri) == "OK"
   end
 
