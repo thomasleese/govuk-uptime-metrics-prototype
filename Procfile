@@ -1,1 +1,1 @@
-collect: bundle exec collect.rb specialist-publisher travel-advice-publisher
+collect: bundle exec collect.rb integration specialist-publisher travel-advice-publisher

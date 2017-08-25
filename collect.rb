@@ -8,10 +8,19 @@ require "net/http"
 require "time"
 require "statsd"
 
+class Array
+  def each_after(n)
+    each_with_index do |elem, i|
+      yield elem if i >= n
+    end
+  end
+end
+
 class Collector
-  def initialize(service)
+  def initialize(service, environment)
     @statsd = Statsd.new("127.0.0.1")
     @service = service
+    @environment = environment
   end
 
   def call
@@ -23,13 +32,18 @@ class Collector
 
 private
 
-  attr_reader :statsd, :service
+  attr_reader :statsd, :service, :environment
 
   def healthcheck_uri
-    @healthcheck_uri ||= URI("https://#{service}.publishing.service.gov.uk/healthcheck")
+    @healthcheck_uri ||= (if environment == "production"
+      URI("https://#{service}.publishing.service.gov.uk/healthcheck")
+    else
+      URI("https://#{service}.#{environment}.publishing.service.gov.uk/healthcheck")
+    end)
   end
 
   def check_status
+    puts healthcheck_uri
     Net::HTTP.get(healthcheck_uri) == "OK"
   end
 
@@ -47,9 +61,11 @@ end
 def main
   threads = []
 
-  ARGV.each do |service|
+  environment = ARGV[0]
+
+  ARGV.each_after(1) do |service|
     threads << Thread.new do
-      Collector.new(service).call
+      Collector.new(service, environment).call
     end
   end
 
