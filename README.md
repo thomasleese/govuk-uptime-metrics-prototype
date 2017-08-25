@@ -4,17 +4,11 @@ A prototype on how we could collect uptime metrics on GOV.UK
 
 ## Usage
 
-First you have to collect uptime data on a service:
+Run the collector which will send the data to statsd.
 
 ```fish
 while true
-  ./collect.rb data specialist-publisher
+  ./collect.rb specialist-publisher travel-advice-publisher
   sleep 1m
 end
-```
-
-Once you have one day's worth of data you can aggregate it into something more useful:
-
-```fish
-./aggregate.rb data
 ```

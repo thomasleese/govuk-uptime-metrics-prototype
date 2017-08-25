@@ -8,37 +8,54 @@ require "net/http"
 require "time"
 require "statsd"
 
-$statsd = Statsd.new("127.0.0.1", 8125)
+class Collector
+  def initialize(service)
+    @statsd = Statsd.new("127.0.0.1")
+    @service = service
+  end
 
-def check_status(service)
-  uri = URI("https://#{service}.publishing.service.gov.uk/healthcheck")
-  response = Net::HTTP.get(uri)
-  response == "OK"
-end
+  def call
+    while true
+      send_to_statsd(check_status)
+      sleep 5
+    end
+  end
 
-def append_to_csv(filename, service, status)
-  CSV.open(filename, "ab") do |csv|
-    csv << [service, Time.now.utc.iso8601, status]
+private
+
+  attr_reader :statsd, :service
+
+  def healthcheck_uri
+    @healthcheck_uri ||= URI("https://#{service}.publishing.service.gov.uk/healthcheck")
+  end
+
+  def check_status
+    puts healthcheck_uri
+    Net::HTTP.get(healthcheck_uri) == "OK"
+  end
+
+  def send_to_statsd(status)
+    puts "#{service}: #{status}"
+    statsd.gauge("uptime.#{service}", status ? 1 : 0)
   end
 end
 
-def send_to_statsd(service, status)
-  $statsd.gauge("uptime.#{service}", status ? 1 : 0)
-end
+# def append_to_csv(filename, service, status)
+#   CSV.open(filename, "ab") do |csv|
+#     csv << [service, Time.now.utc.iso8601, status]
+#   end
+# end
 
 def main
-  path = ARGV[0]
-  service = ARGV[1]
+  threads = []
 
-  FileUtils.mkpath("#{path}/tmp")
-  csv_filename = "#{path}/tmp/#{Time.now.utc.strftime('%Y-%m-%d')}.csv"
+  ARGV.each do |service|
+    threads << Thread.new do
+      Collector.new(service).call
+    end
+  end
 
-  status = check_status(service)
-  append_to_csv(csv_filename, service, status)
-  send_to_statsd(service, status)
+  threads.each { |thread| thread.join }
 end
 
-while true
-  main
-  sleep 1
-end
+main
